@@ -2,7 +2,10 @@
 
 public abstract class AggregateRoot
 {
-    public Guid Id { get; protected set; }
+    protected AggregateRoot(Guid id)
+        => Id = id;
+
+    public Guid Id { get; }
 
     private readonly List<Event> _pendingEvents = new();
 
