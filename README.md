@@ -1,3 +1,6 @@
+# .NET Api + SQL Event Store
+This is a simple example of an ASP.NET Core Web Api using SQLite as an event store.
+
 # SQL Event Store
 Demonstration of a SQL event store with deduplication and guaranteed event ordering. The database rules are intended to prevent incorrect information from entering into an event stream. You are assumed to have familiarity with [event sourcing](https://martinfowler.com/eaaDev/EventSourcing.html).
 
@@ -7,7 +10,7 @@ This event store can also be ported to most SQL RDBMS and accessed from any numb
 
 # Postgres Event Store
 
-The [Postgres version](./postgres-event-store.ddl) of SQL event store has the same behavior as the SQLite version. It was built and tested on Postgres 13 but can be used in other versions.
+The [Postgres version](./tests/postgres-event-store.ddl) of SQL event store has the same behavior as the SQLite version. It was built and tested on Postgres 13 but can be used in other versions.
 
 The postgres version can be tested with the [test-postgres.js]() script. Run this file instead of `test-sqlite.js`. It will connect to the postgres server defined in the environment variables, according to [node-postgres](https://node-postgres.com/features/connecting). 
 
@@ -46,7 +49,7 @@ Appends to other entities do not affect each other, so many events can be append
 
 ### SQL Table Structure
 
-This event store consists of two tables [as described in the DDL](./sqlite-event-store.ddl). The first, `entity_events`, contains the event definitions for an entity type. It must be populated before events can be appended to the main table called `events`.
+This event store consists of two tables [as described in the DDL](./tests/sqlite-event-store.ddl). The first, `entity_events`, contains the event definitions for an entity type. It must be populated before events can be appended to the main table called `events`.
 
 #### `entity_events` Table
 
