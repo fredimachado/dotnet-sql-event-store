@@ -17,6 +17,8 @@ public class Repository<TAggregate> where TAggregate : AggregateRoot
     public async Task SaveAsync(TAggregate aggregate, CancellationToken cancellationToken = default)
     {
         await _eventStore.SaveEventsAsync(aggregate, aggregate.GetPendingEvents(), cancellationToken);
+
+        aggregate.ClearPendingEvents();
     }
 
     public async Task<TAggregate> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)

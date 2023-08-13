@@ -16,7 +16,7 @@ public class RepositoryTests
     }
 
     [Fact]
-    public async Task GetById()
+    public async Task GetById_Should_Return_Aggregate_With_All_Events_Applied()
     {
         var id = Guid.NewGuid();
         _inMemoryEventStore.Events.AddRange(new Event[]
@@ -31,21 +31,19 @@ public class RepositoryTests
         warehouseProduct.ShouldNotBeNull();
         warehouseProduct.QuantityOnHand.ShouldBe(24);
     }
-}
 
-public class InMemoryEventStore : IEventStore
-{
-    public List<Event> Events { get; } = new();
-
-    public Task<IEnumerable<Event>> GetEventsAsync(AggregateRoot aggregate, CancellationToken cancellationToken = default)
+    [Fact]
+    public async Task Successful_Save_Should_Clear_Pending_Events()
     {
-        return Task.FromResult(Events.AsEnumerable());
-    }
+        var id = Guid.NewGuid();
+        var warehouseProduct = new WarehouseProduct(id);
+        warehouseProduct.ReceiveProduct(10);
+        warehouseProduct.ShipProduct(6);
 
-    public Task SaveEventsAsync(AggregateRoot aggregate, IEnumerable<Event> events, CancellationToken cancellationToken = default)
-    {
-        Events.AddRange(events);
+        warehouseProduct.GetPendingEvents().Count.ShouldBe(2);
 
-        return Task.CompletedTask;
+        await _sut.SaveAsync(warehouseProduct);
+
+        warehouseProduct.GetPendingEvents().Count.ShouldBe(0);
     }
 }
