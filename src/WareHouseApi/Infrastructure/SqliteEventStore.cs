@@ -14,9 +14,9 @@ public class SqliteEventStore : IEventStore, IAsyncDisposable
         _connection.Open();
     }
 
-    public async Task SaveEvents(AggregateRoot aggregate, IEnumerable<Event> events, CancellationToken cancellationToken = default)
+    public async Task SaveEventsAsync(AggregateRoot aggregate, IEnumerable<Event> events, CancellationToken cancellationToken = default)
     {
-        var persistedEvents = await GetEvents(aggregate, cancellationToken);
+        var persistedEvents = await GetEventsAsync(aggregate, cancellationToken);
         var lastEventId = persistedEvents?.LastOrDefault()?.EventId;
 
         using var transaction = await _connection.BeginTransactionAsync(cancellationToken);
@@ -60,7 +60,7 @@ public class SqliteEventStore : IEventStore, IAsyncDisposable
         }
     }
 
-    public async Task<IEnumerable<Event>> GetEvents(AggregateRoot aggregate, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Event>> GetEventsAsync(AggregateRoot aggregate, CancellationToken cancellationToken = default)
     {
         var command = _connection.CreateCommand();
         command.CommandText =
