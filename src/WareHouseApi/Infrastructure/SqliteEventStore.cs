@@ -39,7 +39,7 @@ public class SqliteEventStore : IEventStore, IAsyncDisposable
                 command.Parameters.AddWithValue("@entityKey", aggregate.Id.ToString());
                 command.Parameters.AddWithValue("@event", pendingEvent.GetType().Name);
                 command.Parameters.AddWithValue("@data", data);
-                command.Parameters.AddWithValue("@eventId", eventId);
+                command.Parameters.AddWithValue("@eventId", eventId.ToString());
                 command.Parameters.AddWithValue("@commandId", Guid.NewGuid().ToString());
                 if (lastEventId != null)
                 {
