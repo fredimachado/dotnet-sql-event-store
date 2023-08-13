@@ -1,17 +1,23 @@
 ﻿using Microsoft.Data.Sqlite;
-using WareHouseApi.Infrastructure;
 
 namespace Warehouse.Tests.EventStore;
 
-public class SqliteEventStoreTests : IClassFixture<SqliteFixture>, IAsyncDisposable
+public class SqliteEventStoreTests : IDisposable
 {
-    private readonly SqliteFixture _fixture;
-    private readonly SqliteEventStore _sut;
+    public const string ConnectionString = "Data Source=InMemorySample;Mode=Memory;Cache=Shared";
 
-    public SqliteEventStoreTests(SqliteFixture fixture)
+    private readonly SqliteConnection _sqliteConnection;
+
+    public SqliteEventStoreTests()
     {
-        _fixture = fixture;
-        _sut = new SqliteEventStore(new SqliteConnection(SqliteFixture.ConnectionString));
+        var path = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "sqlite-event-store.ddl");
+        var commands = File.ReadAllText(path);
+
+        _sqliteConnection = new SqliteConnection(ConnectionString);
+        _sqliteConnection.Open();
+
+        var command = new SqliteCommand(commands, _sqliteConnection);
+        command.ExecuteNonQuery();
     }
 
     // This is one big test because these tests must run in sequence
@@ -55,7 +61,7 @@ public class SqliteEventStoreTests : IClassFixture<SqliteFixture>, IAsyncDisposa
         result = await AddEntityEvent(entityName: "Thing", eventName: "ThingCreated");
         result.ShouldBeNull();
 
-        using (var secondConnection = new SqliteConnection(SqliteFixture.ConnectionString))
+        using (var secondConnection = new SqliteConnection(ConnectionString))
         {
             secondConnection.Open();
             var queryCommand = secondConnection.CreateCommand();
@@ -199,7 +205,7 @@ public class SqliteEventStoreTests : IClassFixture<SqliteFixture>, IAsyncDisposa
 
     private Task<Exception> UpdateEvents(string entityName)
     {
-        using var connection = new SqliteConnection(SqliteFixture.ConnectionString);
+        using var connection = new SqliteConnection(ConnectionString);
         connection.Open();
 
         var command = new SqliteCommand("UPDATE events SET entityKey = 'fail' WHERE entity = @entityName", connection);
@@ -210,7 +216,7 @@ public class SqliteEventStoreTests : IClassFixture<SqliteFixture>, IAsyncDisposa
 
     private Task<Exception> DeleteEvents(string entityName)
     {
-        using var connection = new SqliteConnection(SqliteFixture.ConnectionString);
+        using var connection = new SqliteConnection(ConnectionString);
         connection.Open();
 
         var command = new SqliteCommand("DELETE FROM events WHERE entity = @entityName", connection);
@@ -221,7 +227,7 @@ public class SqliteEventStoreTests : IClassFixture<SqliteFixture>, IAsyncDisposa
 
     private Task<Exception> UpdateEntityEvents(string entityName)
     {
-        using var connection = new SqliteConnection(SqliteFixture.ConnectionString);
+        using var connection = new SqliteConnection(ConnectionString);
         connection.Open();
 
         var command = new SqliteCommand("UPDATE entity_events SET entity = 'fail' WHERE entity = @entityName", connection);
@@ -232,7 +238,7 @@ public class SqliteEventStoreTests : IClassFixture<SqliteFixture>, IAsyncDisposa
 
     private Task<Exception> DeleteEntityEvents(string entityName)
     {
-        using var connection = new SqliteConnection(SqliteFixture.ConnectionString);
+        using var connection = new SqliteConnection(ConnectionString);
         connection.Open();
 
         var command = new SqliteCommand("DELETE FROM entity_events WHERE entity = @entityName", connection);
@@ -243,7 +249,7 @@ public class SqliteEventStoreTests : IClassFixture<SqliteFixture>, IAsyncDisposa
 
     private Task<Exception> AddEntityEvent(string entityName, string eventName)
     {
-        using var connection = new SqliteConnection(SqliteFixture.ConnectionString);
+        using var connection = new SqliteConnection(ConnectionString);
         connection.Open();
 
         var command = new SqliteCommand("INSERT INTO entity_events (entity, event) VALUES (@entityName, @eventName)", connection);
@@ -255,7 +261,7 @@ public class SqliteEventStoreTests : IClassFixture<SqliteFixture>, IAsyncDisposa
 
     private Task<Exception> AddEvent(string entityName, string entityKey, string eventName, string data, string eventId, string commandId)
     {
-        using var connection = new SqliteConnection(SqliteFixture.ConnectionString);
+        using var connection = new SqliteConnection(ConnectionString);
         connection.Open();
 
         var command = new SqliteCommand("INSERT INTO events (entity, entityKey, event, data, eventId, commandId) VALUES (@entityName, @entityKey, @eventName, @data, @eventId, @commandId)", connection);
@@ -271,7 +277,7 @@ public class SqliteEventStoreTests : IClassFixture<SqliteFixture>, IAsyncDisposa
 
     private Task<Exception> AddEventWithPreviousId(string entityName, string entityKey, string eventName, string data, string eventId, string commandId, string previousId)
     {
-        using var connection = new SqliteConnection(SqliteFixture.ConnectionString);
+        using var connection = new SqliteConnection(ConnectionString);
         connection.Open();
 
         var command = new SqliteCommand("INSERT INTO events (entity, entityKey, event, data, eventId, commandId, previousId) VALUES (@entityName, @entityKey, @eventName, @data, @eventId, @commandId, @previousId)", connection);
@@ -286,8 +292,8 @@ public class SqliteEventStoreTests : IClassFixture<SqliteFixture>, IAsyncDisposa
         return Record.ExceptionAsync(command.ExecuteNonQueryAsync);
     }
 
-    public ValueTask DisposeAsync()
+    public void Dispose()
     {
-        return _sut.DisposeAsync();
+        _sqliteConnection.Dispose();
     }
 }
