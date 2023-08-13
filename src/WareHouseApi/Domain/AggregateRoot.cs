@@ -26,6 +26,14 @@ public abstract class AggregateRoot
         _pendingEvents.Clear();
     }
 
+    internal void ApplyEvents(IEnumerable<Event> events)
+    {
+        foreach (var @event in events)
+        {
+            ApplyEvent(@event);
+        }
+    }
+
     internal void ApplyEvent(Event @event)
     {
         ((dynamic)this).Apply((dynamic)@event);

@@ -12,6 +12,11 @@ public sealed class WarehouseProduct : AggregateRoot
 
     public void ReceiveProduct(int quantity)
     {
+        if (quantity <= 0)
+        {
+            throw new InvalidDomainException("Cannot receive 0 or negative quantity.");
+        }
+
         RaiseEvent(new ProductReceived(Id, quantity, DateTime.UtcNow));
     }
 
