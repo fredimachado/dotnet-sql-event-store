@@ -22,8 +22,44 @@ public static class Endpoints
         {
             var result = await mediator.Send(command);
 
-            return Results.CreatedAtRoute("GetWareHouseProductById", new { id = result });
+            return result.Match(
+                product => Results.CreatedAtRoute("GetWareHouseProductById", new { id = product.Id }),
+                error => Results.BadRequest());
         })
-        .Produces(StatusCodes.Status201Created);
+        .Produces(StatusCodes.Status201Created)
+        .Produces(StatusCodes.Status400BadRequest);
+
+        group.MapPost("/receive", async (IMediator mediator, ReceiveWarehouseProductCommand command) =>
+        {
+            var result = await mediator.Send(command);
+
+            return result.Match(
+                product => Results.AcceptedAtRoute("GetWareHouseProductById", new { id = product.Id }),
+                error => Results.BadRequest());
+        })
+        .Produces(StatusCodes.Status202Accepted)
+        .Produces(StatusCodes.Status400BadRequest);
+
+        group.MapPost("/ship", async (IMediator mediator, ShipWarehouseProductCommand command) =>
+        {
+            var result = await mediator.Send(command);
+
+            return result.Match(
+                product => Results.AcceptedAtRoute("GetWareHouseProductById", new { id = product.Id }),
+                error => Results.BadRequest());
+        })
+        .Produces(StatusCodes.Status202Accepted)
+        .Produces(StatusCodes.Status400BadRequest);
+
+        group.MapPost("/adjust-inventory", async (IMediator mediator, AdjustInventoryCommand command) =>
+        {
+            var result = await mediator.Send(command);
+
+            return result.Match(
+                product => Results.AcceptedAtRoute("GetWareHouseProductById", new { id = product.Id }),
+                error => Results.BadRequest());
+        })
+        .Produces(StatusCodes.Status202Accepted)
+        .Produces(StatusCodes.Status400BadRequest);
     }
 }
