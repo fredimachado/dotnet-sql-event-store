@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.Diagnostics;
-using Microsoft.Extensions.Logging;
-using System.Text.Json;
-using WareHouseApi.Domain;
+﻿using WareHouseApi.Domain;
 
 namespace WareHouseApi.Infrastructure;
 

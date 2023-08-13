@@ -8,6 +8,11 @@ public static class EventTypeResolver
 {
     private readonly static ConcurrentDictionary<string, Type> eventTypes = new ConcurrentDictionary<string, Type>();
 
+    public static void RegisterEvents<T>()
+    {
+        RegisterEvents(typeof(T).Assembly);
+    }
+
     public static void RegisterEvents(Assembly assembly)
     {
         var types = assembly.GetTypes()
